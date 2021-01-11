@@ -23,21 +23,11 @@ module FixerApiClient
     end
 
     def rates
-      @rates ||=
-        if tests?
-          { 'FOO' => 3, 'BAR' => 1.5 }
-        else
-          parse(rates_filename, 'rates')['rates']
-        end
+      @rates ||= parse(rates_filename, 'rates')['rates']
     end
 
     def symbols
-      @symbols ||=
-        if tests?
-          { 'FOO' => 'foo currency', 'BAR' => 'bar currency' }
-        else
-          parse(currencies_filename, 'symbols')['symbols']
-        end
+      @symbols ||= parse(currencies_filename, 'symbols')['symbols']
     end
 
     private 
@@ -69,9 +59,13 @@ module FixerApiClient
     end
 
     def update?(filename)
-      !File.exists?(filename) ||
-        File.zero?(filename) ||
-        ((Time.now.utc - File.mtime(filename).utc) / 60 / 60) > 24
+      return false if tests?
+      return false unless File.exists?(filename) && !File.zero?(filename)
+      return false if filename =~ /currency_symbols/ # currency symbols file doesn't have timestamp...
+
+      data = File.read(filename)
+      json = JSON.parse(data)
+      ((Time.now.utc - Time.at(json['timestamp']).utc) / 60 / 60) > 24
     end
 
     def tests?
@@ -79,11 +73,17 @@ module FixerApiClient
     end
 
     def rates_filename
-      @rates_filename ||= File.join(File.dirname(__dir__), 'data', 'rates_data.json')
+      @rates_filename ||= 
+        File.join(File.dirname(__dir__), 'data', env,'rates_data.json')
+    end
+    
+    def env
+      tests? ? 'test' : 'production'
     end
 
     def currencies_filename
-      @currencies_filename ||= File.join(File.dirname(__dir__), 'data', 'currency_symbols.json')
+      @currencies_filename ||= 
+        File.join(File.dirname(__dir__), 'data', env, 'currency_symbols.json')
     end
 
     def connection

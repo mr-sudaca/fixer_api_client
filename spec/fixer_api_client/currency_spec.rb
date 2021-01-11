@@ -4,11 +4,11 @@ describe FixerApiClient::Currency do
   context 'conversion methods' do
     describe '#to_{currency}' do
       it 'converts value to given currency' do
-        currency = described_class.new(2, 'bar', 'bar currency')
-        expect(currency.to_foo.inspect).to eq('4.0 foo currency')
+        currency = described_class.new(1, 'usd', 'usd currency')
+        expect(currency.to_cop.inspect).to eq('4126.64 Colombian Peso')
 
-        currency = described_class.new(3, 'foo', 'foo currency')
-        expect(currency.to_bar.inspect).to eq('1.5 bar currency')
+        currency = described_class.new(3, 'eur', 'eur currency')
+        expect(currency.to_ars.inspect).to eq('207.16 Argentine Peso')
       end
     end
   end
