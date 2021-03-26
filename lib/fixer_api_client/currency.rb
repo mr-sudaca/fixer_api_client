@@ -1,4 +1,3 @@
-
 module FixerApiClient
   class Currency
     BASE_CURRENCY = 'EUR'
@@ -20,16 +19,9 @@ module FixerApiClient
     FixerApiClient::CurrencyData.symbols.each do |symbol, friendly_name|
       define_method "to_#{symbol.downcase}" do
         new_value = 
-          (to_base * currency_rates[symbol.upcase]).round(2)
+          (to_base * currency_rates[symbol.upcase])
 
         self.class.new(new_value, symbol.downcase, friendly_name)
-      end
-    end
-
-    ['+', '-', '*', '/'].each do |operator|
-      define_method operator do |other_value|
-        new_value = value.public_send(operator, other_value)
-        self.class.new(new_value, symbol, friendly_name)
       end
     end
 
